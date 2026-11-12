@@ -41,10 +41,10 @@ const error: () => errors.$ZodErrorMap = () => {
     mac: "MAC adresi",
     cidrv4: "IPv4 aralığı",
     cidrv6: "IPv6 aralığı",
-    base64: "base64 ile şifrelenmiş metin",
-    base64url: "base64url ile şifrelenmiş metin",
+    base64: "base64 ile kodlanmış metin",
+    base64url: "base64url ile kodlanmış metin",
     json_string: "JSON dizesi",
-    e164: "E.164 sayısı",
+    e164: "E.164 telefon numarası",
     credit_card: "kredi kartı numarası",
     currency_code: "para birimi kodu",
     iban: "IBAN",
@@ -56,6 +56,16 @@ const error: () => errors.$ZodErrorMap = () => {
     [k in errors.$ZodInvalidTypeExpected | (string & {})]?: string;
   } = {
     nan: "NaN",
+    string: "metin",
+    number: "sayı",
+    boolean: "mantıksal değer",
+    bigint: "büyük tam sayı",
+    symbol: "sembol",
+    array: "dizi",
+    object: "nesne",
+    date: "tarih",
+    file: "dosya",
+    function: "fonksiyon",
   };
 
   return (issue) => {
@@ -75,15 +85,17 @@ const error: () => errors.$ZodErrorMap = () => {
       case "too_big": {
         const adj = issue.inclusive ? "<=" : "<";
         const sizing = getSizing(issue.origin);
+        const origin = TypeDictionary[issue.origin] ?? issue.origin;
         if (sizing)
-          return `Çok büyük: beklenen ${issue.origin ?? "değer"} ${adj}${issue.maximum.toString()} ${sizing.unit ?? "öğe"}`;
-        return `Çok büyük: beklenen ${issue.origin ?? "değer"} ${adj}${issue.maximum.toString()}`;
+          return `Çok büyük: beklenen ${origin ?? "değer"} ${adj}${issue.maximum.toString()} ${sizing.unit ?? "öğe"}`;
+        return `Çok büyük: beklenen ${origin ?? "değer"} ${adj}${issue.maximum.toString()}`;
       }
       case "too_small": {
         const adj = issue.inclusive ? ">=" : ">";
         const sizing = getSizing(issue.origin);
-        if (sizing) return `Çok küçük: beklenen ${issue.origin} ${adj}${issue.minimum.toString()} ${sizing.unit}`;
-        return `Çok küçük: beklenen ${issue.origin} ${adj}${issue.minimum.toString()}`;
+        const origin = TypeDictionary[issue.origin] ?? issue.origin;
+        if (sizing) return `Çok küçük: beklenen ${origin} ${adj}${issue.minimum.toString()} ${sizing.unit}`;
+        return `Çok küçük: beklenen ${origin} ${adj}${issue.minimum.toString()}`;
       }
       case "invalid_format": {
         const _issue = issue as errors.$ZodStringFormatIssues;
@@ -98,11 +110,11 @@ const error: () => errors.$ZodErrorMap = () => {
       case "unrecognized_keys":
         return `Tanınmayan anahtar${issue.keys.length > 1 ? "lar" : ""}: ${util.joinValues(issue.keys, ", ")}`;
       case "invalid_key":
-        return `${issue.origin} içinde geçersiz anahtar`;
+        return `${TypeDictionary[issue.origin] ?? issue.origin} içinde geçersiz anahtar`;
       case "invalid_union":
         return "Geçersiz değer";
       case "invalid_element":
-        return `${issue.origin} içinde geçersiz değer`;
+        return `${TypeDictionary[issue.origin] ?? issue.origin} içinde geçersiz değer`;
       default:
         return `Geçersiz değer`;
     }

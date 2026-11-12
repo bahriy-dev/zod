@@ -29,11 +29,11 @@ test("locales - tr", () => {
 
   const invalidType = z.number().safeParse("a");
   expect(invalidType.error!.issues[0].code).toBe("invalid_type");
-  expect(invalidType.error!.issues[0].message).toBe("Geçersiz değer: beklenen number, alınan string");
+  expect(invalidType.error!.issues[0].message).toBe("Geçersiz değer: beklenen sayı, alınan metin");
 
   const invalidType2 = z.string().safeParse(1);
   expect(invalidType2.error!.issues[0].code).toBe("invalid_type");
-  expect(invalidType2.error!.issues[0].message).toBe("Geçersiz değer: beklenen string, alınan number");
+  expect(invalidType2.error!.issues[0].message).toBe("Geçersiz değer: beklenen metin, alınan sayı");
 
   const invalidValue = z.enum(["a", "b"]).safeParse(1);
   expect(invalidValue.error!.issues[0].code).toBe("invalid_value");
@@ -41,11 +41,11 @@ test("locales - tr", () => {
 
   const tooBig = z.number().max(10).safeParse(15);
   expect(tooBig.error!.issues[0].code).toBe("too_big");
-  expect(tooBig.error!.issues[0].message).toBe("Çok büyük: beklenen number <=10");
+  expect(tooBig.error!.issues[0].message).toBe("Çok büyük: beklenen sayı <=10");
 
   const tooSmall = z.number().min(10).safeParse(5);
   expect(tooSmall.error!.issues[0].code).toBe("too_small");
-  expect(tooSmall.error!.issues[0].message).toBe("Çok küçük: beklenen number >=10");
+  expect(tooSmall.error!.issues[0].message).toBe("Çok küçük: beklenen sayı >=10");
 
   const invalidFormatRegex = z.string().regex(/abcd/).safeParse("invalid-string");
   expect(invalidFormatRegex.error!.issues[0].code).toBe("invalid_format");
@@ -54,6 +54,9 @@ test("locales - tr", () => {
   const invalidFormatStartsWith = z.string().startsWith("abcd").safeParse("invalid-string");
   expect(invalidFormatStartsWith.error!.issues[0].code).toBe("invalid_format");
   expect(invalidFormatStartsWith.error!.issues[0].message).toBe('Geçersiz metin: "abcd" ile başlamalı');
+
+  const invalidBase64 = z.base64().safeParse("not base64!");
+  expect(invalidBase64.error!.issues[0].message).toBe("Geçersiz base64 ile kodlanmış metin");
 
   const notMultipleOf = z.number().multipleOf(3).safeParse(10);
   expect(notMultipleOf.error!.issues[0].code).toBe("not_multiple_of");
